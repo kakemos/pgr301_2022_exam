@@ -4,8 +4,9 @@
 name: CI pipeline
 on:
   push:
+    branches:
   pull_request:
-    - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
