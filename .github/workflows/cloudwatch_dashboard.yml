@@ -3,6 +3,7 @@ defaults:
   run:
     working-directory: infra
 on:
+  push:
   pull_request:
   workflow_dispatch:
 
