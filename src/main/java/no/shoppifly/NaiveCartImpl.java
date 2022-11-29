@@ -10,11 +10,6 @@ class NaiveCartImpl implements CartService {
     private final Map<String, Cart> shoppingCarts = new HashMap<>();
 
     @Override
-    public Cart newCart(Cart cart) {
-        return null;
-    }
-
-    @Override
     public Cart getCart(String id) {
         return shoppingCarts.get(id);
     }

@@ -1,24 +1,27 @@
 package no.shoppifly;
 
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 
 @RestController()
 public class ShoppingCartController implements ApplicationListener<ApplicationReadyEvent> {
 
-    @Autowired
-    private final CartService cartService;
+    private Counter checkoutCounter;
+    private Timer checkoutTimer;
 
-    private final Map<String, Cart> shoppingCarts = new HashMap<>();
+    @Autowired
     private MeterRegistry meterRegistry;
+    private final CartService cartService;
 
     public ShoppingCartController(CartService cartService) {
         this.cartService = cartService;
@@ -28,8 +31,10 @@ public class ShoppingCartController implements ApplicationListener<ApplicationRe
     public ShoppingCartController(CartService cartService, MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
         this.cartService = cartService;
-    }
 
+        checkoutCounter = meterRegistry.counter("checkout_count");
+        checkoutTimer = meterRegistry.timer("checkout_latency");
+    }
 
     @GetMapping(path = "/cart/{id}")
     public Cart getCart(@PathVariable String id) {
@@ -43,7 +48,10 @@ public class ShoppingCartController implements ApplicationListener<ApplicationRe
      */
     @PostMapping(path = "/cart/checkout")
     public String checkout(@RequestBody Cart cart) {
-        meterRegistry.counter("checkout_count").increment();
+        long startTime = System.currentTimeMillis();
+        checkoutCounter.increment();
+        checkoutTimer.record(Duration.ofMillis(System.currentTimeMillis() - startTime));
+
         return cartService.checkout(cart);
     }
 
@@ -65,19 +73,24 @@ public class ShoppingCartController implements ApplicationListener<ApplicationRe
      */
     @GetMapping(path = "/carts")
     public List<String> getAllCarts() {
-
         return cartService.getAllsCarts();
     }
 
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
-        Gauge.builder("checkout_count", shoppingCarts,
-                s -> s.values().size()).register(meterRegistry);
+        Gauge.builder("cart_count", cartService,
+                s -> s.getAllsCarts().size()).register(meterRegistry);
 
-        Gauge.builder("cart_count", shoppingCarts,
-                s -> s.values().size()).register(meterRegistry);
-
+        /*
+        Gauge.builder("carts_value", cartService,
+                s -> s.getAllsCarts()
+                        .stream()
+                        .map(Cart::getItems)
+                        .map(Item::getUnitPrice)
+                        .mapToDouble(BigDecimal::doubleValue)
+                        .sum())
+                .register(meterRegistry);
+         */
     }
-
 }
