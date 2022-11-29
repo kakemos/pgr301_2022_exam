@@ -7,6 +7,8 @@ import java.util.List;
 @Component
 public interface CartService {
 
+    Cart newCart(Cart cart);
+
     Cart getCart(String id);
 
     Cart update(Cart cart);

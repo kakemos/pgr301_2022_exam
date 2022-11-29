@@ -14,15 +14,22 @@ import java.util.Map;
 @RestController()
 public class ShoppingCartController implements ApplicationListener<ApplicationReadyEvent> {
 
-    private final Map<String, Cart> shoppingCarts = new HashMap<>();
-    private MeterRegistry meterRegistry;
-
     @Autowired
     private final CartService cartService;
+
+    private final Map<String, Cart> shoppingCarts = new HashMap<>();
+    private MeterRegistry meterRegistry;
 
     public ShoppingCartController(CartService cartService) {
         this.cartService = cartService;
     }
+
+    @Autowired
+    public ShoppingCartController(CartService cartService, MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+        this.cartService = cartService;
+    }
+
 
     @GetMapping(path = "/cart/{id}")
     public Cart getCart(@PathVariable String id) {
@@ -36,6 +43,7 @@ public class ShoppingCartController implements ApplicationListener<ApplicationRe
      */
     @PostMapping(path = "/cart/checkout")
     public String checkout(@RequestBody Cart cart) {
+        meterRegistry.counter("checkout_count").increment();
         return cartService.checkout(cart);
     }
 
@@ -57,16 +65,19 @@ public class ShoppingCartController implements ApplicationListener<ApplicationRe
      */
     @GetMapping(path = "/carts")
     public List<String> getAllCarts() {
+
         return cartService.getAllsCarts();
     }
 
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
-       /*
-        Gauge.builder("cart_count", cartService,
-                s -> s.getAllsCarts().size()).register(meterRegistry);
-       */
+        Gauge.builder("checkout_count", shoppingCarts,
+                s -> s.values().size()).register(meterRegistry);
+
+        Gauge.builder("cart_count", shoppingCarts,
+                s -> s.values().size()).register(meterRegistry);
+
     }
 
 }
