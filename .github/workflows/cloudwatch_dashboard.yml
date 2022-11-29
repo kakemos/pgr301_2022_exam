@@ -17,7 +17,6 @@ jobs:
       AWS_REGION: eu-west-1
       CANDIDATE_ID: jim
       CANDIDATE_EMAIL: jim@gaffel.com
-      IMAGE: 244530008913.dkr.ecr.eu-west-1.amazonaws.com/1015:latest
     steps:
       - uses: actions/checkout@v3
       - name: Setup Terraform
@@ -35,4 +34,4 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -var="candidate_id=$CANDIDATE_ID" -var="candidate_email=$CANDIDATE_EMAIL" -var="image=$IMAGE" --s3-bucket analyticsbucket -auto-approve
+        run: terraform apply -var="candidate_id=$CANDIDATE_ID" -var="candidate_email=$CANDIDATE_EMAIL" -auto-approve
