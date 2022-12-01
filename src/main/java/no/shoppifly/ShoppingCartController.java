@@ -10,22 +10,20 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 @RestController()
 public class ShoppingCartController implements ApplicationListener<ApplicationReadyEvent> {
 
-    private Counter checkoutCounter;
-    private Timer checkoutTimer;
+    private final Counter checkoutCounter;
+    private final Timer checkoutTimer;
 
     @Autowired
     private MeterRegistry meterRegistry;
     private final CartService cartService;
-
-    public ShoppingCartController(CartService cartService) {
-        this.cartService = cartService;
-    }
 
     @Autowired
     public ShoppingCartController(CartService cartService, MeterRegistry meterRegistry) {
@@ -36,7 +34,7 @@ public class ShoppingCartController implements ApplicationListener<ApplicationRe
         checkoutTimer = meterRegistry.timer("checkout_latency");
     }
 
-    @GetMapping(path = "/cart/{id}")
+    @GetMapping(path = "/cart/{id}", consumes = "application/json", produces = "application/json")
     public Cart getCart(@PathVariable String id) {
         return cartService.getCart(id);
     }
@@ -47,7 +45,7 @@ public class ShoppingCartController implements ApplicationListener<ApplicationRe
      * @return an order ID
      */
     @Timed
-    @PostMapping(path = "/cart/checkout")
+    @PostMapping(path = "/cart/checkout", consumes = "application/json", produces = "application/json")
     public String checkout(@RequestBody Cart cart) {
         long startTime = System.currentTimeMillis();
         checkoutCounter.increment();
@@ -62,7 +60,7 @@ public class ShoppingCartController implements ApplicationListener<ApplicationRe
      *
      * @return the updated cart
      */
-    @PostMapping(path = "/cart")
+    @PostMapping(path = "/cart", consumes = "application/json", produces = "application/json")
     public Cart updateCart(@RequestBody Cart cart) {
         return cartService.update(cart);
     }
@@ -72,26 +70,29 @@ public class ShoppingCartController implements ApplicationListener<ApplicationRe
      *
      * @return
      */
-    @GetMapping(path = "/carts")
+    @GetMapping(path = "/carts", consumes = "application/json", produces = "application/json")
     public List<String> getAllCarts() {
         return cartService.getAllsCarts();
+    }
+
+    @GetMapping(path = "/all-carts", consumes = "application/json", produces = "application/json")
+    public Map<String, Cart> getAlllCarts() {
+        return cartService.getAllCarts();
     }
 
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
         Gauge.builder("cart_count", cartService,
-                s -> s.getAllsCarts().size()).register(meterRegistry);
+                c -> c.getAllsCarts().size()).register(meterRegistry);
 
-        /*
         Gauge.builder("carts_value", cartService,
-                s -> s.getAllsCarts()
+                s -> s.getAllCarts()
+                        .values()
                         .stream()
-                        .map(Cart::getItems)
-                        .map(Item::getUnitPrice)
-                        .mapToDouble(BigDecimal::doubleValue)
-                        .sum())
+                        .flatMap(c -> c.getItems().stream()
+                                .map(i -> i.getUnitPrice() * i.getQty()))
+                        .reduce(0f, Float::sum))
                 .register(meterRegistry);
-         */
     }
 }

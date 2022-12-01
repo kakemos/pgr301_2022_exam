@@ -34,6 +34,11 @@ class NaiveCartImpl implements CartService {
         return new ArrayList<>(shoppingCarts.keySet());
     }
 
+    @Override
+    public Map<String, Cart> getAllCarts() {
+        return shoppingCarts;
+    }
+
     // @author Jim; I'm so proud of this one, took me one week to figure out !!!
     public float total() {
         return shoppingCarts.values().stream()
