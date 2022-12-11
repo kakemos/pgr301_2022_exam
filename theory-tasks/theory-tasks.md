@@ -18,7 +18,7 @@ En bedre tilnærming ville vært å automatisere prosesser for å eliminere menn
 ### 1.3
 **Teamet overleverer kode til en annen avdeling som har ansvar for drift – hva er utfordringen med dette ut ifra et DevOps perspektiv, og hvilke gevinster kan man få ved at team han ansvar for både drift- og utvikling?**
 
-Når utviklerne ikke selv har ansvar for vedlikehold og drift, så har de heller ikke «skin in the game». De utvikler dermed med tanken om at hva enn de lager ikke vil være deres problem uansett og vil aldri måtte lære av egen smerte, siden de sender alt ansvar videre til driftsavdelingen som må ta hånd om alle konsekvensene selv. 
+Når utviklerne ikke selv har ansvar for vedlikehold og drift, så har de heller ikke «skin in the game». De utvikler dermed med tanken om at hva enn de lager ikke vil være deres problem uansett og de vil aldri måtte lære av egen smerte, siden de sender alt ansvar videre til driftsavdelingen som må ta hånd om alle konsekvensene selv. 
 
 Det betyr at driftsavdelingen vil bruke mer tid på å fikse unødvendige problemer da utviklingsavdelingen ikke er like nøye på det de lager, i tillegg til at driftsavdelingen ikke kjenner koden like godt som det utviklerne gjør. Dette fører også til mer unødvendig tid for å sette seg inn i koden for å forstå problemet, som igjen fører til enda mer unødvendig teknisk gjeld, da dette er tid som kunne blitt brukt på å utvikle nye funksjoner.
 
