@@ -81,6 +81,4 @@ I tillegg må man legge til sine egne AWS Access Keys i Guthub Action Secrets fo
 ### 5.1
 **Forklar med egne ord. Hva er årsaken til dette problemet? Hvorfor forsøker Terraform å opprette en bucket, når den allerede eksisterer?**
 
-Terraform forsøker å opprette en eksisterende bucket fordi den allerede blir laget et annet sted i Terraform-konfigurasjonen,
-i dette tilfelle i ```provider.tf```. Vi kan derfor endre ```"aws_s3_bucket``` i ```databucket.tf``` fra ```resource``` til ```data```, hvis ikke 
-vil disse få en konflikt. Man kan også kjøre en ```terraform import aws_s3_bucket.analyticsbucket <BUCKET-NAME>``` for å importere den eksisterende bucketen.
+Terraform forsøker å opprette en eksisterende bucket fordi, om den ikke finner informasjon om tidligere bygget infrastruktur, så vet den ikke at bucketen allerede finnes og vil prøve å lage denne på nytt. Terraform trenger altså terraform.tfstate-fil for å kunne gjenbruke den allerede opprettede bucketen. I terraformkonfigurasjonen vår så putter vi denne filen i S3-bucketen på AWS, men får ikke tak i den. Om vi endrer ```"aws_s3_bucket``` i ```databucket.tf``` fra ```resource``` til ```data```, så vil dette fungere igjen. Man kan også kjøre en ```terraform import aws_s3_bucket.analyticsbucket <BUCKET-NAME>``` for å importere den eksisterende bucketen.
